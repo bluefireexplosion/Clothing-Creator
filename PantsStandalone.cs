@@ -133,9 +133,11 @@ public class PantsStandalone : EditorWindow
 				PantsMet.LoadImage (fileContent);
 				PantsMet.Apply ();
 				mat.SetTexture ("_MetallicGlossMap", PantsMet);
+				//Confirm that the asset previews in the window completely reimport, updating the images.
 				AssetDatabase.ImportAsset ("Assets/Pants_Assets/Resources/Bundles/Items/Pants/Jeans_Work/Material.mat");
 				AssetDatabase.Refresh ();
 			}
+			//Absolutely confirm reimport
 			UnityEditor.AssetDatabase.Refresh();
 		}
 		EditorGUILayout.EndHorizontal ();
@@ -820,11 +822,15 @@ public class PantsStandalone : EditorWindow
 		MethodInfo clearConsoleMethod = logEntries.GetMethod ("Clear");
 		clearConsoleMethod.Invoke (new object (), null);
 	}
+	/* Runs close window scripts, removes GameObject from the scene to allow for a new window to be opened of another type and 
+	not conflict.
+	*/
 	void OnDestroy()
 	{
+	//Finds the gameobject instantiated earlier and deletes it immediately.
 		GameObject pants = GameObject.Find ("Pants");
 		DestroyImmediate (pants);
-		isOpen = false;
+		//isOpen = false;
 	}
 
 }
