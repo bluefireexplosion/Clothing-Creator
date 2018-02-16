@@ -36,7 +36,7 @@ public class PantsStandalone : EditorWindow
 	double actualArmor;
 	bool generateDats, createdItem = false, fireResistant = false, waterproof = false,
 	armor = false, standardBlueprints = true, customItemSize = false, custFileName = false, 
-	cleanProject = false, KeepManifests = false, devFold = false, importdialog = false, displayErrors = false, hasRan = false;
+	cleanProject = false, KeepManifests = false, devFold = false, generalFold = true, bundleFold = true, importdialog = false, displayErrors = false, hasRan = false;
 	static bool isOpen = false;
 	//The two Texture2Ds used to show previews of the Image Texture and InGame preview.
 	Texture2D PantsTex, PantsPreview, PantsEm, PantsMet;
@@ -83,20 +83,21 @@ public class PantsStandalone : EditorWindow
 	void OnGUI()
 	{
 		//Debug.Log (Application.dataPath);
-		GUILayout.Label("General Settings", EditorStyles.boldLabel);
+		generalFold = EditorGUILayout.Foldout (generalFold, "General Settings");
+		if (generalFold) {
+
+			GUILayout.Label ("General Settings", EditorStyles.boldLabel);
 		EditorGUILayout.HelpBox ("Select the texture with the button below. Emission & Metallic textures are optional. Metallic shaders are experimental, expect issues.", MessageType.Info);
 		EditorGUILayout.BeginHorizontal ();
 		EditorGUILayout.PrefixLabel ("Image Texture");
 		//This little void allows me to open a file prompt looking for .png files (Must support transparency at the moment)
-		if (GUILayout.Button ("Select", GUILayout.Width (200))) 
-		{
-			string path = EditorUtility.OpenFilePanel("Select Texture", "", "png");
-			if (path.Length != 0)
-			{
+		if (GUILayout.Button ("Select", GUILayout.Width (200))) {
+			string path = EditorUtility.OpenFilePanel ("Select Texture", "", "png");
+			if (path.Length != 0) {
 				//The magical and still confusing process of reading bytes from the file into a var.
-				var fileContent = File.ReadAllBytes(path);
+				var fileContent = File.ReadAllBytes (path);
 				//Loading that magical var into the Texture2D's image slot.
-				PantsTex.LoadImage(fileContent);
+				PantsTex.LoadImage (fileContent);
 				//This is the most important, as it applies the changes we have made to the texture.
 				PantsTex.Apply ();
 				AssetDatabase.Refresh ();
@@ -105,12 +106,10 @@ public class PantsStandalone : EditorWindow
 		EditorGUILayout.EndHorizontal ();
 		EditorGUILayout.BeginHorizontal ();
 		EditorGUILayout.PrefixLabel ("Emission Texture");
-		if (GUILayout.Button ("Select", GUILayout.Width (200))) 
-		{
-			string path = EditorUtility.OpenFilePanel("Select Emission Texture", "", "png,jpeg,jpg");
-			if (path.Length != 0)
-			{
-				var fileContent = File.ReadAllBytes(path);
+		if (GUILayout.Button ("Select", GUILayout.Width (200))) {
+			string path = EditorUtility.OpenFilePanel ("Select Emission Texture", "", "png,jpeg,jpg");
+			if (path.Length != 0) {
+				var fileContent = File.ReadAllBytes (path);
 				PantsEm.LoadImage (fileContent);
 				PantsEm.Apply ();
 				mat.SetColor ("_EmissionColor", Color.white);
@@ -124,21 +123,17 @@ public class PantsStandalone : EditorWindow
 		EditorGUILayout.EndHorizontal ();
 		EditorGUILayout.BeginHorizontal ();
 		EditorGUILayout.PrefixLabel ("Metallic Texture");
-		if (GUILayout.Button ("Select", GUILayout.Width (200))) 
-		{
-			string path = EditorUtility.OpenFilePanel("Select Metallic Texture", "", "png");
-			if (path.Length != 0)
-			{
-				var fileContent = File.ReadAllBytes(path);
+		if (GUILayout.Button ("Select", GUILayout.Width (200))) {
+			string path = EditorUtility.OpenFilePanel ("Select Metallic Texture", "", "png");
+			if (path.Length != 0) {
+				var fileContent = File.ReadAllBytes (path);
 				PantsMet.LoadImage (fileContent);
 				PantsMet.Apply ();
 				mat.SetTexture ("_MetallicGlossMap", PantsMet);
-				//Confirm that the asset previews in the window completely reimport, updating the images.
 				AssetDatabase.ImportAsset ("Assets/Pants_Assets/Resources/Bundles/Items/Pants/Jeans_Work/Material.mat");
 				AssetDatabase.Refresh ();
 			}
-			//Absolutely confirm reimport
-			UnityEditor.AssetDatabase.Refresh();
+			UnityEditor.AssetDatabase.Refresh ();
 		}
 		EditorGUILayout.EndHorizontal ();
 		smoothness = EditorGUILayout.Slider ("Smoothness", smoothness, 0, 1, GUILayout.Width (350));
@@ -159,139 +154,139 @@ public class PantsStandalone : EditorWindow
 		EditorGUILayout.EndHorizontal ();
 		EditorGUILayout.BeginHorizontal ();
 		EditorGUILayout.PrefixLabel ("Texture Preview");
-		GUILayout.Label ("In-Game Preview", GUILayout.Width(150));
+		GUILayout.Label ("In-Game Preview", GUILayout.Width (150));
 		EditorGUILayout.EndHorizontal ();
 		EditorGUILayout.BeginHorizontal ();
 		GUILayout.Box (AssetPreview.GetAssetPreview (PantsTex));
 		GUILayout.Box (PantsScenePreview);
 		EditorGUILayout.EndHorizontal ();
 		camRotation = EditorGUILayout.Slider ("Rotate Preview", camRotation, 0, 360, GUILayout.Width (350));
-		generateDats = EditorGUILayout.BeginToggleGroup("Generate .DAT Files", generateDats);
-		EditorGUILayout.HelpBox ("These are the stats files for your item.", MessageType.Info);
-		itemName = EditorGUILayout.TextField("Item Name", itemName, GUILayout.Width (350));
-		itemDescription = EditorGUILayout.TextField("Item Description", itemDescription, GUILayout.Width (350));
-		EditorGUILayout.BeginHorizontal ();
-		EditorGUILayout.PrefixLabel ("ID Number");
-		itemID = EditorGUILayout.IntSlider (itemID, 2000, 65000, GUILayout.Width (200));
-		EditorGUILayout.EndHorizontal ();
-		pantsRarity = (RARENESS)EditorGUILayout.EnumPopup ("Item Rarity", pantsRarity, GUILayout.Width (350));
-		/*
+	}
+		bundleFold = EditorGUILayout.Foldout (bundleFold, "Bundler Settings");
+		if (bundleFold) {
+			generateDats = EditorGUILayout.BeginToggleGroup ("Generate .DAT Files", generateDats);
+			EditorGUILayout.HelpBox ("These are the stats files for your item.", MessageType.Info);
+			itemName = EditorGUILayout.TextField ("Item Name", itemName, GUILayout.Width (350));
+			itemDescription = EditorGUILayout.TextField ("Item Description", itemDescription, GUILayout.Width (350));
+			EditorGUILayout.BeginHorizontal ();
+			EditorGUILayout.PrefixLabel ("ID Number");
+			itemID = EditorGUILayout.IntSlider (itemID, 2000, 65000, GUILayout.Width (200));
+			EditorGUILayout.EndHorizontal ();
+			pantsRarity = (RARENESS)EditorGUILayout.EnumPopup ("Item Rarity", pantsRarity, GUILayout.Width (350));
+			/*
 		 * Currently unimplemented dynamic preview system for Width and Height of Item and storage size. Hopefully will be implemented at a later date.
 		 * 
 		 * storageFold = EditorGUILayout.Foldout(storageFold, "Storage Preview");
 		 * sizeFold = EditorGUILayout.Foldout (sizeFold, "Size Preview");
 		*/
-		fireResistant = EditorGUILayout.Toggle("Fire Resistant", fireResistant, GUILayout.Width (350));
-		waterproof = EditorGUILayout.Toggle("Waterproof", waterproof, GUILayout.Width (350));
-		//Remind me to add a visual blueprint creator to this at some point
-		standardBlueprints = EditorGUILayout.Toggle ("Add Standard Blueprints", standardBlueprints, GUILayout.Width (350));
-		EditorGUILayout.HelpBox ("The Standard Blueprints option adds the blueprint to scrap the pants into cloth, and the blueprint to repair it with cloth.", MessageType.Info);
-		customItemSize = EditorGUILayout.BeginToggleGroup ("Custom Item Size", customItemSize);
-		itemWidth = EditorGUILayout.IntSlider ("Custom Item Width", itemWidth, 1, 5, GUILayout.Width (350));
-		itemHeight = EditorGUILayout.IntSlider ("Custom Item Height", itemHeight, 1, 5, GUILayout.Width (350));
-		EditorGUILayout.HelpBox ("This is how large in grid squares your item will take up. Disabling Custom Item Size will reset to the default size, 3 squares wide by 2 squares tall.", MessageType.Info);
-		EditorGUILayout.EndToggleGroup ();
-		armor = EditorGUILayout.BeginToggleGroup("Armor", armor);
-		armorLevel = EditorGUILayout.IntSlider("Damage Absorption", armorLevel, 1, 100, GUILayout.Width (350));
-		GUILayout.Label (armorLevel + "% of any damage to the torso will be absorbed.");
-		EditorGUILayout.EndToggleGroup();
-		GUILayout.Label("Item Storage Slots", EditorStyles.boldLabel);
-		itemStorageWidth = EditorGUILayout.IntSlider ("Storage Width", itemStorageWidth, 1, 15, GUILayout.Width (350));
-		itemStorageHeight = EditorGUILayout.IntSlider ("Storage Height", itemStorageHeight, 1, 15, GUILayout.Width (350));
-		EditorGUILayout.HelpBox ("This is how large in grid squares your item's storage slots will be when equipped. A good average is around 4-5 squares wide and tall.", MessageType.Info);
-		EditorGUILayout.EndToggleGroup();
-		customNameString = EditorGUILayout.TextField ("Custom File Name", customNameString, GUILayout.Width (350));
-		EditorGUILayout.HelpBox ("This option is for advanced users who want to customize the name of mod files created. The standard option automatically removes spaces from the item name and uses that. If you aren't happy with that name being used as the File Name, use this to change it to a more preferable option.", MessageType.Info);
-		if (itemNameFlat.Contains(" "))
-		{
-			EditorGUILayout.HelpBox ("Please note that any spaces added to the File Name input box will be automatically removed with spaces when processed.", MessageType.Warning);
-		}
-		KeepManifests = EditorGUILayout.Toggle ("Keep Manifests", KeepManifests);
-		cleanProject = EditorGUILayout.Toggle ("Clean Project After Bundle", cleanProject);
-		EditorGUILayout.HelpBox ("This option allows your project to be automatically set up for the next item, i.e removing any objects currently in scene and deleting the Pants_Assets file. Don't use this if you plan on making more pantss after this!", MessageType.Info);
-		if (GUILayout.Button ("Create Mod Files", GUILayout.Width(350))) 
-		{
-			if (generateDats == false && customNameString == "" || itemName == "" && customNameString == "") {
-				EditorGUILayout.HelpBox ("You must specify a name for the mod, if you choose not to generate .DAT files. Enter one in the Custom File Name slot.", MessageType.Warning);
-			} else
-			{
-				//The following line allows for the user inputted Item Name to have a dual purpose system, in which it is used to name the file and the in-game item. It removes any spaces with underlines, to maintain styling with SDG assets and to prevent any errors. 
-				//itemNameFlat = itemName.Replace (" ", "_");
-				/* Because I opted for an ease of use system in which the armor slider is shown as a percentage of damage absorbed, I have to convert it to the method used in the dat files. Basically, in the dat files it uses a multiplier like 0.55, which would multiply any incoming damage by 0.55.
+			fireResistant = EditorGUILayout.Toggle ("Fire Resistant", fireResistant, GUILayout.Width (350));
+			waterproof = EditorGUILayout.Toggle ("Waterproof", waterproof, GUILayout.Width (350));
+			//Remind me to add a visual blueprint creator to this at some point
+			standardBlueprints = EditorGUILayout.Toggle ("Add Standard Blueprints", standardBlueprints, GUILayout.Width (350));
+			EditorGUILayout.HelpBox ("The Standard Blueprints option adds the blueprint to scrap the pants into cloth, and the blueprint to repair it with cloth.", MessageType.Info);
+			customItemSize = EditorGUILayout.BeginToggleGroup ("Custom Item Size", customItemSize);
+			itemWidth = EditorGUILayout.IntSlider ("Custom Item Width", itemWidth, 1, 5, GUILayout.Width (350));
+			itemHeight = EditorGUILayout.IntSlider ("Custom Item Height", itemHeight, 1, 5, GUILayout.Width (350));
+			EditorGUILayout.HelpBox ("This is how large in grid squares your item will take up. Disabling Custom Item Size will reset to the default size, 3 squares wide by 2 squares tall.", MessageType.Info);
+			EditorGUILayout.EndToggleGroup ();
+			armor = EditorGUILayout.BeginToggleGroup ("Armor", armor);
+			armorLevel = EditorGUILayout.IntSlider ("Damage Absorption", armorLevel, 1, 100, GUILayout.Width (350));
+			GUILayout.Label (armorLevel + "% of any damage to the torso will be absorbed.");
+			EditorGUILayout.EndToggleGroup ();
+			GUILayout.Label ("Item Storage Slots", EditorStyles.boldLabel);
+			itemStorageWidth = EditorGUILayout.IntSlider ("Storage Width", itemStorageWidth, 1, 15, GUILayout.Width (350));
+			itemStorageHeight = EditorGUILayout.IntSlider ("Storage Height", itemStorageHeight, 1, 15, GUILayout.Width (350));
+			EditorGUILayout.HelpBox ("This is how large in grid squares your item's storage slots will be when equipped. A good average is around 4-5 squares wide and tall.", MessageType.Info);
+			EditorGUILayout.EndToggleGroup ();
+			customNameString = EditorGUILayout.TextField ("Custom File Name", customNameString, GUILayout.Width (350));
+			EditorGUILayout.HelpBox ("This option is for advanced users who want to customize the name of mod files created. The standard option automatically removes spaces from the item name and uses that. If you aren't happy with that name being used as the File Name, use this to change it to a more preferable option.", MessageType.Info);
+			if (itemNameFlat.Contains (" ")) {
+				EditorGUILayout.HelpBox ("Please note that any spaces added to the File Name input box will be automatically removed with spaces when processed.", MessageType.Warning);
+			}
+			KeepManifests = EditorGUILayout.Toggle ("Keep Manifests", KeepManifests);
+			cleanProject = EditorGUILayout.Toggle ("Clean Project After Bundle", cleanProject);
+			EditorGUILayout.HelpBox ("This option allows your project to be automatically set up for the next item, i.e removing any objects currently in scene and deleting the Pants_Assets file. Don't use this if you plan on making more pantss after this!", MessageType.Info);
+			if (GUILayout.Button ("Create Mod Files", GUILayout.Width (350))) {
+				if (generateDats == false && customNameString == "" || itemName == "" && customNameString == "") {
+					EditorGUILayout.HelpBox ("You must specify a name for the mod, if you choose not to generate .DAT files. Enter one in the Custom File Name slot.", MessageType.Warning);
+				} else {
+					//The following line allows for the user inputted Item Name to have a dual purpose system, in which it is used to name the file and the in-game item. It removes any spaces with underlines, to maintain styling with SDG assets and to prevent any errors. 
+					//itemNameFlat = itemName.Replace (" ", "_");
+					/* Because I opted for an ease of use system in which the armor slider is shown as a percentage of damage absorbed, I have to convert it to the method used in the dat files. Basically, in the dat files it uses a multiplier like 0.55, which would multiply any incoming damage by 0.55.
 			 * This multiplier would essentially negate 45% of the damage. In order to make it easier to understand for inexperienced modders, I simply have to subtract
 			 * the float value I created earlier out of 100 to get the percentage of armor negated, then divide by 100 to get a decimal. Oh, and since you're here and reading this, I just wanted to say congrats to you for either attempting to learn programming or wanting to see how this works. You're
 			 * going to go far, kid. :)
 			 * */
-				Debug.Log (100 - armorLevel);
-				actualArmor = (double)(100 - armorLevel) / 100;
-				if (customNameString != "") {
-					itemNameFlat = customNameString.Replace (" ", "_");
-					Debug.Log ("cust name:" + itemNameFlat);
-					Debug.Log (customNameString != "");
-					Debug.Log (customNameString != null);
-				} else {
-					itemNameFlat = itemName.Replace (" ", "_");
-				}
-				//This is the new weird and wonky Unity 5+ asset bundling system. While I've never coded in Unity 4, this system definitely seems more complex. The function below gets the path to the Pants_Assets folder and marks it as a "unity3d" bundle. This removes the need for user based renaming.
-				AssetImporter.GetAtPath ("Assets/Pants_Assets").SetAssetBundleNameAndVariant ("temp", "unity3d");
-				//Prompt for the user to select what folder they would like to save to. The window is called "Select Bundle Folder", the path is the string it returns, and "Mod Folder" is the default name shown when the window opens.
-				path = EditorUtility.SaveFolderPanel ("Select Bundle Folder", path, "Mod Folder");
-				System.IO.Directory.CreateDirectory (Application.dataPath + "/" + itemNameFlat + "/test");
-				Debug.Log (Application.dataPath + "/" + itemNameFlat + "/test");
-				System.IO.Directory.Delete (Application.dataPath + "/" + itemNameFlat + "/test", true);
-				//Checking whether or not the user enabled creation of .dat files
-				if (generateDats) {
-					using (StreamWriter sw = File.CreateText (Application.dataPath + "/" + itemNameFlat + "/" + itemNameFlat + ".dat")) {
-						Debug.Log (Application.dataPath + "/" + itemNameFlat + "/" + itemNameFlat + ".dat");
-						sw.WriteLine ("Type Pants");
-						sw.WriteLine ("Rarity " + pantsRarity);
-						sw.WriteLine ("Useable Clothing");
-						sw.WriteLine ("ID " + itemID);
-						//This is added to make it look more human, human written dat files feature some spaces between lines
-						sw.WriteLine (" ");
-						if (customItemSize) {
-							sw.WriteLine ("Size_X " + itemWidth);
-							sw.WriteLine ("Size_Y " + itemHeight);
-							sw.WriteLine ("Size_Z 0.6");
-						}
-						if (!customItemSize) {
-							//If the user did not toggle custom item sizes, the default 3x2 will be used instead.
-							sw.WriteLine ("Size_X 3");
-							sw.WriteLine ("Size_Y 2");
-							sw.WriteLine ("Size_Z 0.6");
-						}
-						sw.WriteLine (" ");
-						sw.WriteLine ("Width " + itemStorageWidth);
-						sw.WriteLine ("Height " + itemStorageHeight);
-						sw.WriteLine (" ");
-						if (armor) {
-							sw.WriteLine ("Armor " + actualArmor);
-							sw.WriteLine (" ");
-						}
-						if (fireResistant)
-							sw.WriteLine ("Proof_Fire");
-						if (waterproof)
-							sw.WriteLine ("Proof_Water");
-						if (standardBlueprints) {
-							sw.WriteLine (" ");
-							sw.WriteLine ("Blueprints 2");
-							sw.WriteLine ("Blueprint_0_Type Apparel");
-							sw.WriteLine ("Blueprint_0_Supply_0_ID 1421");
-							sw.WriteLine ("Blueprint_0_Product 66");
-							sw.WriteLine ("Blueprint_0_Products 3");
-							sw.WriteLine ("Blueprint_0_Build 32");
-							sw.WriteLine ("Blueprint_1_Type Repair");
-							sw.WriteLine ("Blueprint_1_Supplies 1");
-							sw.WriteLine ("Blueprint_1_Supply_0_ID 66");
-							sw.WriteLine ("Blueprint_1_Supply_0_Amount 3");
-							sw.WriteLine ("Blueprint_1_Build 32");
-						}
-					}	
-					using (StreamWriter sx = File.CreateText (Application.dataPath + "/" + itemNameFlat + "/English.dat")) {
-						sx.WriteLine ("Name " + itemName);
-						sx.WriteLine ("Description " + itemDescription);
+					Debug.Log (100 - armorLevel);
+					actualArmor = (double)(100 - armorLevel) / 100;
+					if (customNameString != "") {
+						itemNameFlat = customNameString.Replace (" ", "_");
+						Debug.Log ("cust name:" + itemNameFlat);
+						Debug.Log (customNameString != "");
+						Debug.Log (customNameString != null);
+					} else {
+						itemNameFlat = itemName.Replace (" ", "_");
 					}
-					/*
+					//This is the new weird and wonky Unity 5+ asset bundling system. While I've never coded in Unity 4, this system definitely seems more complex. The function below gets the path to the Pants_Assets folder and marks it as a "unity3d" bundle. This removes the need for user based renaming.
+					AssetImporter.GetAtPath ("Assets/Pants_Assets").SetAssetBundleNameAndVariant ("temp", "unity3d");
+					//Prompt for the user to select what folder they would like to save to. The window is called "Select Bundle Folder", the path is the string it returns, and "Mod Folder" is the default name shown when the window opens.
+					path = EditorUtility.SaveFolderPanel ("Select Bundle Folder", path, "Mod Folder");
+					System.IO.Directory.CreateDirectory (Application.dataPath + "/" + itemNameFlat + "/test");
+					Debug.Log (Application.dataPath + "/" + itemNameFlat + "/test");
+					System.IO.Directory.Delete (Application.dataPath + "/" + itemNameFlat + "/test", true);
+					//Checking whether or not the user enabled creation of .dat files
+					if (generateDats) {
+						using (StreamWriter sw = File.CreateText (Application.dataPath + "/" + itemNameFlat + "/" + itemNameFlat + ".dat")) {
+							Debug.Log (Application.dataPath + "/" + itemNameFlat + "/" + itemNameFlat + ".dat");
+							sw.WriteLine ("Type Pants");
+							sw.WriteLine ("Rarity " + pantsRarity);
+							sw.WriteLine ("Useable Clothing");
+							sw.WriteLine ("ID " + itemID);
+							//This is added to make it look more human, human written dat files feature some spaces between lines
+							sw.WriteLine (" ");
+							if (customItemSize) {
+								sw.WriteLine ("Size_X " + itemWidth);
+								sw.WriteLine ("Size_Y " + itemHeight);
+								sw.WriteLine ("Size_Z 0.6");
+							}
+							if (!customItemSize) {
+								//If the user did not toggle custom item sizes, the default 3x2 will be used instead.
+								sw.WriteLine ("Size_X 3");
+								sw.WriteLine ("Size_Y 2");
+								sw.WriteLine ("Size_Z 0.6");
+							}
+							sw.WriteLine (" ");
+							sw.WriteLine ("Width " + itemStorageWidth);
+							sw.WriteLine ("Height " + itemStorageHeight);
+							sw.WriteLine (" ");
+							if (armor) {
+								sw.WriteLine ("Armor " + actualArmor);
+								sw.WriteLine (" ");
+							}
+							if (fireResistant)
+								sw.WriteLine ("Proof_Fire");
+							if (waterproof)
+								sw.WriteLine ("Proof_Water");
+							if (standardBlueprints) {
+								sw.WriteLine (" ");
+								sw.WriteLine ("Blueprints 2");
+								sw.WriteLine ("Blueprint_0_Type Apparel");
+								sw.WriteLine ("Blueprint_0_Supply_0_ID 1421");
+								sw.WriteLine ("Blueprint_0_Product 66");
+								sw.WriteLine ("Blueprint_0_Products 3");
+								sw.WriteLine ("Blueprint_0_Build 32");
+								sw.WriteLine ("Blueprint_1_Type Repair");
+								sw.WriteLine ("Blueprint_1_Supplies 1");
+								sw.WriteLine ("Blueprint_1_Supply_0_ID 66");
+								sw.WriteLine ("Blueprint_1_Supply_0_Amount 3");
+								sw.WriteLine ("Blueprint_1_Build 32");
+							}
+						}	
+						using (StreamWriter sx = File.CreateText (Application.dataPath + "/" + itemNameFlat + "/English.dat")) {
+							sx.WriteLine ("Name " + itemName);
+							sx.WriteLine ("Description " + itemDescription);
+						}
+						/*
 				 * NOTICE: THIS IS THE BROKEN AND LEGACY WAY I ATTEMPTED TO WRITE TO DAT FILES WITH. IT DOES NOT WORK AND IS ONLY BEING SAVED FOR THE SAKE OF POSTERITY. DO NOT ATTEMPT TO USE AS IT IS COMPLETELY BROKEN.
 				 * Basically, what I'm doing here is checking what the user requested to be added to any .dat files and writing it. The dat file is generated automatically if it doesn't exist (which it shouldn't) when the first WriteAllText is ran. 
 				System.IO.File.WriteAllText (path + "/English.dat", "Name " + itemName + "\n" + "Description " + itemDescription);
@@ -315,27 +310,28 @@ public class PantsStandalone : EditorWindow
 					System.IO.File.WriteAllText (path + "/" + itemNameFlat + ".dat", "\nBlueprints 2 \nBlueprint_0_Type Apparel\nBlueprint_0_Supply_0_ID 1421\nBlueprint_0_Product 66\nBlueprint_0_Products 3\nBlueprint_0_Build 32\nBlueprint_1_Type Repair\nBlueprint_1_Supplies 1\nBlueprint_1_Supply_0_ID 66\nBlueprint_1_Supply_0_Amount 3\nBlueprint_1_Build 32\n");
 				}	
 				*/
-				}
-				//Bundle the Unity3d file and place it in the same path folder mentioned early marked path. This isn't a reusable script as it doesn't carry over the parameters like a reusable void would, i.e getting the local class variable rather than bundleAssets(String path);
-				bundleAssets ();
-				UnityEditor.AssetDatabase.Refresh ();
-				File.Delete (Application.dataPath + "/" + itemNameFlat + ".meta"); 
-				File.Move (Application.dataPath + "/" + itemNameFlat + "/temp.unity3d", Application.dataPath + "/" + itemNameFlat + "/" + itemNameFlat + ".unity3d");
-				File.Move (Application.dataPath + "/" + itemNameFlat, path + "/" + itemNameFlat);
-				File.Delete (path + "/" + itemNameFlat + "/English.dat.meta"); 
-				File.Delete (path + "/" + itemNameFlat + "/temp.unity3d.manifest"); 
-				File.Delete (path + "/" + itemNameFlat + "/temp.unity3d.manifest.meta"); 
-				File.Delete (path + "/" + itemNameFlat + "/temp.unity3d.meta"); 
-				File.Delete (path + "/" + itemNameFlat + "/" + itemNameFlat); 
-				File.Delete (path + "/" + itemNameFlat + "/" + itemNameFlat + ".manifest"); 
-				File.Delete (path + "/" + itemNameFlat + "/" + itemNameFlat + ".meta"); 
-				File.Delete (path + "/" + itemNameFlat + "/" + itemNameFlat + ".manifest.meta"); 
-				File.Delete (path + "/" + itemNameFlat + "/" + itemNameFlat + ".dat.meta"); 
+					}
+					//Bundle the Unity3d file and place it in the same path folder mentioned early marked path. This isn't a reusable script as it doesn't carry over the parameters like a reusable void would, i.e getting the local class variable rather than bundleAssets(String path);
+					bundleAssets ();
+					UnityEditor.AssetDatabase.Refresh ();
+					File.Delete (Application.dataPath + "/" + itemNameFlat + ".meta"); 
+					File.Move (Application.dataPath + "/" + itemNameFlat + "/temp.unity3d", Application.dataPath + "/" + itemNameFlat + "/" + itemNameFlat + ".unity3d");
+					File.Move (Application.dataPath + "/" + itemNameFlat, path + "/" + itemNameFlat);
+					File.Delete (path + "/" + itemNameFlat + "/English.dat.meta"); 
+					File.Delete (path + "/" + itemNameFlat + "/temp.unity3d.manifest"); 
+					File.Delete (path + "/" + itemNameFlat + "/temp.unity3d.manifest.meta"); 
+					File.Delete (path + "/" + itemNameFlat + "/temp.unity3d.meta"); 
+					File.Delete (path + "/" + itemNameFlat + "/" + itemNameFlat); 
+					File.Delete (path + "/" + itemNameFlat + "/" + itemNameFlat + ".manifest"); 
+					File.Delete (path + "/" + itemNameFlat + "/" + itemNameFlat + ".meta"); 
+					File.Delete (path + "/" + itemNameFlat + "/" + itemNameFlat + ".manifest.meta"); 
+					File.Delete (path + "/" + itemNameFlat + "/" + itemNameFlat + ".dat.meta"); 
 
+				}
 			}
-		}
-		if (generateDats == false && customNameString == "" || itemName == "" && customNameString == "") {
-			EditorGUILayout.HelpBox ("You must specify a name for the mod, in either the Item Name slot or in the Custom Name slot if you have chosen not to generate .DATs", MessageType.Error);
+			if (generateDats == false && customNameString == "" || itemName == "" && customNameString == "") {
+				EditorGUILayout.HelpBox ("You must specify a name for the mod, in either the Item Name slot or in the Custom Name slot if you have chosen not to generate .DATs", MessageType.Error);
+			}
 		}
 		devFold = EditorGUILayout.Foldout (devFold, "Dev Tests");
 		if (devFold) {
@@ -822,15 +818,11 @@ public class PantsStandalone : EditorWindow
 		MethodInfo clearConsoleMethod = logEntries.GetMethod ("Clear");
 		clearConsoleMethod.Invoke (new object (), null);
 	}
-	/* Runs close window scripts, removes GameObject from the scene to allow for a new window to be opened of another type and 
-	not conflict.
-	*/
 	void OnDestroy()
 	{
-	//Finds the gameobject instantiated earlier and deletes it immediately.
 		GameObject pants = GameObject.Find ("Pants");
 		DestroyImmediate (pants);
-		//isOpen = false;
+		isOpen = false;
 	}
 
 }
