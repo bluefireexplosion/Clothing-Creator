@@ -51,7 +51,7 @@ public class ShirtStandalone : EditorWindow
 	cleanProject = false, KeepManifests = false, devFold = false, generalFold = true, bundleFold = true, importdialog = false, displayErrors = false, hasRan = false; 
 	static bool isOpen = false;
 	//The two Texture2Ds used to show previews of the Image Texture and InGame preview.
-	Texture2D ShirtTex, ShirtPreview, ShirtEm, ShirtMet;
+	Texture2D ShirtTex, ShirtPreview, ShirtEm, ShirtMet, ShirtNull;
 	//The float representing the rotation of Holder, which controls the camera angle.
 	float camRotation = 0f, smoothness, metallicLevel;
 	GameObject holder, cam, clone;
@@ -158,10 +158,16 @@ public class ShirtStandalone : EditorWindow
 			EditorGUILayout.BeginHorizontal ();
 			if (GUILayout.Button ("Reset Emission", GUILayout.Width (173))) {
 				mat.SetColor ("_EmissionColor", Color.black);
+				var tempFile = File.ReadAllBytes (Application.dataPath + "/ClothingCreator/Icons/transparent.png");
+				ShirtEm.LoadImage (tempFile);
+				ShirtEm.Apply ();
 			}
 			if (GUILayout.Button ("Reset Metallic", GUILayout.Width (173))) {
-				mat.SetTexture ("_MetallicGlossMap", null);
+				var tempFile = File.ReadAllBytes (Application.dataPath + "/ClothingCreator/Icons/black.png");
+				ShirtMet.LoadImage (tempFile);
+				ShirtMet.Apply ();
 				mat.SetFloat ("_Metallic", 0);
+				mat.SetTexture ("_MetallicGlossMap", null);
 				AssetDatabase.ImportAsset ("Assets/Shirt_Assets/Resources/Bundles/Items/Shirts/Hoodie_Orange/Material.mat");
 				AssetDatabase.Refresh ();
 			}
@@ -340,6 +346,7 @@ public class ShirtStandalone : EditorWindow
 					File.Delete (path + "/" + itemNameFlat + "/" + itemNameFlat + ".meta"); 
 					File.Delete (path + "/" + itemNameFlat + "/" + itemNameFlat + ".manifest.meta"); 
 					File.Delete (path + "/" + itemNameFlat + "/" + itemNameFlat + ".dat.meta"); 
+					Debug.Log (Application.dataPath);
 
 				}
 			}
@@ -566,6 +573,7 @@ public class ShirtStandalone : EditorWindow
 			ShirtTex = AssetDatabase.LoadAssetAtPath<Texture2D> ("Assets/Shirt_Assets/Resources/Bundles/Items/Shirts/Hoodie_Orange/Shirt.png");
 			ShirtEm = AssetDatabase.LoadAssetAtPath<Texture2D> ("Assets/Shirt_Assets/Resources/Bundles/Items/Shirts/Hoodie_Orange/Emission.png");
 			ShirtMet = AssetDatabase.LoadAssetAtPath<Texture2D> ("Assets/Shirt_Assets/Resources/Bundles/Items/Shirts/Hoodie_Orange/Metallic.png");
+			ShirtNull = AssetDatabase.LoadAssetAtPath<Texture2D> ("Assets/ClothingCreator/Icons/transparent.png");
 			mat.SetFloat ("_GlossMapScale", smoothness);
 			mat.SetFloat ("_Glossiness", smoothness);
 			mat.SetFloat ("_Metallic", 0);

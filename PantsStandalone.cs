@@ -144,9 +144,14 @@ public class PantsStandalone : EditorWindow
 		EditorGUILayout.BeginHorizontal ();
 		if (GUILayout.Button ("Reset Emission", GUILayout.Width (173))) {
 			mat.SetColor ("_EmissionColor", Color.black);
+				var tempFile = File.ReadAllBytes (Application.dataPath + "/ClothingCreator/Icons/transparent.png");
+				PantsEm.LoadImage (tempFile);
+				PantsEm.Apply ();
 		}
 		if (GUILayout.Button ("Reset Metallic", GUILayout.Width (173))) {
-			mat.SetTexture ("_MetallicGlossMap", null);
+			var tempFile = File.ReadAllBytes (Application.dataPath + "/ClothingCreator/Icons/black.png");
+			PantsMet.LoadImage (tempFile);
+			PantsMet.Apply ();
 			mat.SetFloat ("_Metallic", 0);
 			AssetDatabase.ImportAsset ("Assets/Pants_Assets/Resources/Bundles/Items/Pants/Jeans_Work/Material.mat");
 			AssetDatabase.Refresh ();
