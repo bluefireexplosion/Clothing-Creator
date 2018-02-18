@@ -9,8 +9,7 @@ using System.Reflection;
 //using Witty.Joke.Except.ImNotFunny;
 
 /*
- * This program was written by a 15 year old named BlueFireExplosion. If you put your mind to it,
- * you can do anything. :) 
+ * Hat creator is NOWHERE NEAR DONE, in case you couldn't tell. It's coming along, don't worry :)
  * 
  * Credit to Nelson Sexton for Unturned and the modding community. Awesome game, my friend! 
  * */
